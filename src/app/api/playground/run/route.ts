@@ -15,6 +15,22 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             throw new AppError("validation_failed", { message: "Invalid JSON request body" });
         }
 
+        if (json && typeof json === "object") {
+            const raw = json as Record<string, unknown>;
+            if (!raw.input && typeof raw.prompt === "string") {
+                const modelId = typeof raw.modelId === "string" && raw.modelId !== "auto-router" ? raw.modelId : undefined;
+                json = {
+                    ...raw,
+                    selectionMode: modelId ? "selected" : (raw.selectionMode || "automatic"),
+                    modelId,
+                    preference: raw.preference || raw.optimizationPreference || "cost",
+                    input: {
+                        messages: [{ role: "user", content: raw.prompt }],
+                    },
+                };
+            }
+        }
+
         const parsed = playgroundRunRequestSchema.safeParse(json);
         if (!parsed.success) {
             throw parsed.error;

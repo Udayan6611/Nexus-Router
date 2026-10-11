@@ -15,6 +15,19 @@ export async function POST(request: NextRequest): Promise<NextResponse> {
             throw new AppError("validation_failed", { message: "Invalid JSON request body" });
         }
 
+        if (json && typeof json === "object") {
+            const raw = json as Record<string, unknown>;
+            if (!raw.input && typeof raw.prompt === "string") {
+                json = {
+                    ...raw,
+                    preference: raw.preference || raw.optimizationPreference || "cost",
+                    input: {
+                        messages: [{ role: "user", content: raw.prompt }],
+                    },
+                };
+            }
+        }
+
         const parsed = routeExecutionRequestSchema.safeParse(json);
         if (!parsed.success) {
             throw parsed.error;

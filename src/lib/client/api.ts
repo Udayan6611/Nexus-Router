@@ -141,10 +141,18 @@ export const apiClient = {
             blockedProviders?: string[];
         };
     }): Promise<RunRecordItem> {
+        const body = {
+            preference: payload.optimizationPreference || "cost",
+            input: {
+                messages: [{ role: "user", content: payload.prompt }],
+            },
+            ...(payload.taskType ? { taskType: payload.taskType } : {}),
+            constraints: payload.constraints || {},
+        };
         const res = await fetch("/api/route", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(body),
         });
         return handleResponse(res);
     },
@@ -156,10 +164,21 @@ export const apiClient = {
         optimizationPreference?: string;
         constraints?: Record<string, unknown>;
     }): Promise<RunRecordItem> {
+        const isSelected = Boolean(payload.modelId && payload.modelId !== "auto-router");
+        const body = {
+            selectionMode: isSelected ? "selected" : "automatic",
+            ...(isSelected ? { modelId: payload.modelId } : {}),
+            preference: payload.optimizationPreference || "cost",
+            input: {
+                messages: [{ role: "user", content: payload.prompt }],
+            },
+            ...(payload.taskType ? { taskType: payload.taskType } : {}),
+            constraints: payload.constraints || {},
+        };
         const res = await fetch("/api/playground/run", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
+            body: JSON.stringify(body),
         });
         return handleResponse(res);
     },
