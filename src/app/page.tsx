@@ -19,24 +19,31 @@ export default function Home() {
   const [exploreQuery, setExploreQuery] = useState<string>('');
   const [showShortlistLoader, setShowShortlistLoader] = useState<boolean>(true);
 
-  // Sync hash routing
+  // Sync path and hash routing
   useEffect(() => {
-    const handleHash = () => {
+    const handleRoute = () => {
       if (typeof window === 'undefined') return;
-      if (window.location.hash === '#playground') {
+      const path = window.location.pathname.toLowerCase();
+      const hash = window.location.hash.toLowerCase();
+
+      if (path.includes('playground') || hash === '#playground') {
         setCurrentScreen('playground');
-      } else if (window.location.hash === '#explore' || window.location.hash === '#models') {
+      } else if (path.includes('explore') || path.includes('models') || hash === '#explore' || hash === '#models') {
         setShowShortlistLoader(true);
         setCurrentScreen('explore-models');
-      } else if (window.location.hash === '#test-results') {
+      } else if (path.includes('test-results') || hash === '#test-results') {
         setCurrentScreen('test-results');
-      } else if (window.location.hash === '#landing' || !window.location.hash) {
+      } else {
         setCurrentScreen('landing');
       }
     };
-    handleHash();
-    window.addEventListener('hashchange', handleHash);
-    return () => window.removeEventListener('hashchange', handleHash);
+    handleRoute();
+    window.addEventListener('hashchange', handleRoute);
+    window.addEventListener('popstate', handleRoute);
+    return () => {
+      window.removeEventListener('hashchange', handleRoute);
+      window.removeEventListener('popstate', handleRoute);
+    };
   }, []);
 
   const openPlayground = () => {
