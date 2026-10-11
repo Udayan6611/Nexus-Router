@@ -17,7 +17,11 @@ export const metadata: Metadata = {
   description: "Cost-, Latency- & Quality-Aware AI Model Routing and Inference Engine",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode;
+}>) {
   return (
     <html
       lang="en"
